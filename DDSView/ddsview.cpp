@@ -10,6 +10,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include <shellapi.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -17,6 +18,7 @@
 #include <d3d11.h>
 
 #include <algorithm>
+#include <string>
 
 #include <directxmath.h>
 
@@ -103,16 +105,24 @@ void Render();
 
 //--------------------------------------------------------------------------------------
 #pragma warning( suppress : 6262 )
-int WINAPI wWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow )
+int WINAPI wWinMain( _In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR, _In_ int nCmdShow )
 {
     UNREFERENCED_PARAMETER( hPrevInstance );
-    UNREFERENCED_PARAMETER( lpCmdLine );
 
-    if ( !*lpCmdLine )
+    std::wstring imageFileName;
+    int nNumArgs;
+    LPWSTR* pstrArgList = CommandLineToArgvW(GetCommandLine(), &nNumArgs);
+    if (nNumArgs >= 2)
     {
-        MessageBoxW( nullptr, L"Usage: ddsview <filename>", L"DDSView", MB_OK | MB_ICONEXCLAMATION );
+        imageFileName = pstrArgList[1];
+    }
+    else
+    {
+        MessageBox(NULL, L"Usage: ddsView.exe <filename>", L"DDSView", MB_OK | MB_ICONEXCLAMATION);
         return 0;
     }
+
+    auto lpCmdLine = imageFileName.c_str();
 
     TexMetadata mdata;
     HRESULT hr = GetMetadataFromDDSFile( lpCmdLine, DDS_FLAGS_NONE, mdata );
